@@ -123,4 +123,4 @@ vite.config.js   → Configuración del entorno Vite
 
 Este proyecto no es de código abierto. Licenciado mediante BSL 1.1.
 
-Desarrollado con 💻 por **Gerardo Fabian Gonzalez Moreno **
+Desarrollado con 💻 por **Gerardo Fabian Gonzalez Moreno**
