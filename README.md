@@ -77,8 +77,8 @@ usuarios (collection)
 ## 🛠️ Instalación local
 
 ```bash
-git clone https://github.com/tuusuario/nombre-del-repo.git
-cd nombre-del-repo
+git clone https://github.com/GerardoGM14/plataforma-fisica-gamificada.git
+cd plataforma-fisica-gamificada
 npm install
 npm run dev
 ```
