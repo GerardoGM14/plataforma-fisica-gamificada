@@ -1,6 +1,6 @@
 # 📚 Plataforma Web Gamificada – Física I
 
-Este proyecto es una plataforma interactiva desarrollada con **React + Vite**, orientada al aprendizaje gamificado de conceptos clave del curso **Física I**. Está dirigida a estudiantes de nivel universitario, combinando contenido visual, quizzes, recursos multimedia y seguimiento personalizado.
+Este proyecto es una plataforma interactiva desarrollada con **React + Vite + Firebase**, orientada al aprendizaje gamificado de conceptos clave del curso **Física I**. Está dirigida a estudiantes de nivel universitario, combinando contenido visual, quizzes, recursos multimedia y seguimiento personalizado.
 
 ---
 
