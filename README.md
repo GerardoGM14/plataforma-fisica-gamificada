@@ -4,7 +4,10 @@ Este proyecto es una plataforma interactiva desarrollada con **React + Vite + Fi
 
 ---
 
-## Dashboard
+## Dashboard (Top)
+![Vista del sistema](https://i.postimg.cc/fLvC0NCz/imagen-2025-06-22-111653587.png)
+
+## Dashboard (Modulos)
 ![Vista del sistema](https://i.postimg.cc/N0yqJ5yz/imagen-2025-06-22-102222935.png)
 
 ## Usuario (Logros)
