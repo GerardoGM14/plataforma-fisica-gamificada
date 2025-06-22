@@ -83,18 +83,16 @@ npm install
 npm run dev
 ```
 
-⚠️ Recuerda configurar tu archivo `firebase.js` con los valores de Firebase:
+⚠️ Recuerda configurar tu archivo `.env` con los valores de Firebase:
 
 ```env
-const firebaseConfig = {
-  apiKey: ...........................,
-  authDomain: ...........................,
-  projectId: ...........................,
-  storageBucket: ...........................,
-  messagingSenderId: ...........................,
-  appId: ...........................,
-  measurementId: ...........................,
-};
+VITE_FIREBASE_API_KEY=tu-api-key
+VITE_FIREBASE_AUTH_DOMAIN=tu-auth-domain
+VITE_FIREBASE_PROJECT_ID=tu-project-id
+VITE_FIREBASE_STORAGE_BUCKET=tu-storage-bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=tu-messaging-sender-id
+VITE_FIREBASE_APP_ID=tu-app-id
+
 ```
 
 ---
