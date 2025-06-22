@@ -19,62 +19,91 @@ function Dashboard() {
   const [activeTab, setActiveTab] = useState("modulos")
   const navigate = useNavigate()
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        try {
-          // Cargar datos del usuario
-          const ref = doc(db, "usuarios", currentUser.uid)
-          const snapshot = await getDoc(ref)
-          if (snapshot.exists()) {
-            setUserData(snapshot.data())
-          }
+  // Estados para el leaderboard
+  const [topUsuarios, setTopUsuarios] = useState([])
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(true)
 
-          // Cargar módulos
-          const modulosSnapshot = await getDocs(collection(db, "modulos"))
-          const modulosLista = modulosSnapshot.docs
-            .map((doc) => ({ id: doc.id, ...doc.data() }))
-            .filter((modulo) => modulo.activo === true); // solo módulos activos
-          setModulos(modulosLista);
+  // Función para cargar top usuarios
+  const cargarTopUsuarios = async () => {
+    try {
+      setLoadingLeaderboard(true)
+      const usuariosSnapshot = await getDocs(collection(db, "usuarios"))
+      const usuariosList = usuariosSnapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((usuario) => usuario.puntaje > 0) // Solo usuarios con puntaje
+        .sort((a, b) => (b.puntaje || 0) - (a.puntaje || 0)) // Ordenar por puntaje descendente
+        .slice(0, 3) // Solo top 3
 
-          // Cargar Progreso
-          const cargarProgreso = async () => {
-            if (!user) return
+      setTopUsuarios(usuariosList)
+    } catch (error) {
+      console.error("Error al cargar top usuarios:", error)
+    } finally {
+      setLoadingLeaderboard(false)
+    }
+  }
 
-            const progresoRef = collection(db, "usuarios", user.uid, "progreso")
-            const snapshot = await getDocs(progresoRef)
+  useEffect(
+    () => {
+      const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+        if (currentUser) {
+          try {
+            // Cargar datos del usuario
+            const ref = doc(db, "usuarios", currentUser.uid)
+            const snapshot = await getDoc(ref)
+            if (snapshot.exists()) {
+              setUserData(snapshot.data())
+            }
 
-            let correctas = 0
-            let total = 0
-            let evaluaciones = 0
+            // Cargar módulos
+            const modulosSnapshot = await getDocs(collection(db, "modulos"))
+            const modulosLista = modulosSnapshot.docs
+              .map((doc) => ({ id: doc.id, ...doc.data() }))
+              .filter((modulo) => modulo.activo === true) // solo módulos activos
+            setModulos(modulosLista)
 
-            snapshot.forEach((doc) => {
-              const data = doc.data()
-              correctas += data.preguntasCorrectas || 0
-              total += data.totalPreguntas || 0
-              if (data.totalPreguntas > 0) evaluaciones++
-            })
+            // Cargar Progreso
+            const cargarProgreso = async () => {
+              if (!user) return
 
-            setEjerciciosCompletados(correctas)
-            setTotalEjercicios(total)
-            setEvaluacionesHechas(evaluaciones)
-            setProgresoGeneral(total > 0 ? Math.round((correctas / total) * 100) : 0)
-          }
+              const progresoRef = collection(db, "usuarios", user.uid, "progreso")
+              const snapshot = await getDocs(progresoRef)
+
+              let correctas = 0
+              let total = 0
+              let evaluaciones = 0
+
+              snapshot.forEach((doc) => {
+                const data = doc.data()
+                correctas += data.preguntasCorrectas || 0
+                total += data.totalPreguntas || 0
+                if (data.totalPreguntas > 0) evaluaciones++
+              })
+
+              setEjerciciosCompletados(correctas)
+              setTotalEjercicios(total)
+              setEvaluacionesHechas(evaluaciones)
+              setProgresoGeneral(total > 0 ? Math.round((correctas / total) * 100) : 0)
+            }
             cargarProgreso()
 
-        } catch (error) {
-          console.error("Error al cargar datos:", error)
-        } finally {
-          setLoading(false)
+            // Cargar top usuarios
+            cargarTopUsuarios()
+          } catch (error) {
+            console.error("Error al cargar datos:", error)
+          } finally {
+            setLoading(false)
+          }
+        } else {
+          // Usuario no autenticado, redirigir al login
+          navigate("/")
         }
-      } else {
-        // Usuario no autenticado, redirigir al login
-        navigate("/")
-      }
-    })
+      })
 
-    return () => unsubscribe()
-  }, [navigate], [user])
+      return () => unsubscribe()
+    },
+    [navigate],
+    [user],
+  )
 
   // Calcular nivel basado en puntaje
   const calcularNivel = (puntaje) => {
@@ -130,28 +159,31 @@ function Dashboard() {
             <div className="hidden md:flex space-x-4">
               <button
                 onClick={() => setActiveTab("modulos")}
-                className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === "modulos"
-                  ? "bg-white/20 text-white"
-                  : "text-blue-100 hover:bg-white/10 hover:text-white"
-                  }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  activeTab === "modulos"
+                    ? "bg-white/20 text-white"
+                    : "text-blue-100 hover:bg-white/10 hover:text-white"
+                }`}
               >
                 Módulos
               </button>
               <button
                 onClick={() => setActiveTab("progreso")}
-                className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === "progreso"
-                  ? "bg-white/20 text-white"
-                  : "text-blue-100 hover:bg-white/10 hover:text-white"
-                  }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  activeTab === "progreso"
+                    ? "bg-white/20 text-white"
+                    : "text-blue-100 hover:bg-white/10 hover:text-white"
+                }`}
               >
                 Mi Progreso
               </button>
               <button
                 onClick={() => setActiveTab("insignias")}
-                className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === "insignias"
-                  ? "bg-white/20 text-white"
-                  : "text-blue-100 hover:bg-white/10 hover:text-white"
-                  }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  activeTab === "insignias"
+                    ? "bg-white/20 text-white"
+                    : "text-blue-100 hover:bg-white/10 hover:text-white"
+                }`}
               >
                 Insignias
               </button>
@@ -200,22 +232,25 @@ function Dashboard() {
       <div className="md:hidden bg-white border-b px-4 py-2 flex justify-between overflow-x-auto">
         <button
           onClick={() => setActiveTab("modulos")}
-          className={`px-3 py-1 text-sm font-medium whitespace-nowrap ${activeTab === "modulos" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-600 hover:text-blue-600"
-            }`}
+          className={`px-3 py-1 text-sm font-medium whitespace-nowrap ${
+            activeTab === "modulos" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-600 hover:text-blue-600"
+          }`}
         >
           Módulos
         </button>
         <button
           onClick={() => setActiveTab("progreso")}
-          className={`px-3 py-1 text-sm font-medium whitespace-nowrap ${activeTab === "progreso" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-600 hover:text-blue-600"
-            }`}
+          className={`px-3 py-1 text-sm font-medium whitespace-nowrap ${
+            activeTab === "progreso" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-600 hover:text-blue-600"
+          }`}
         >
           Mi Progreso
         </button>
         <button
           onClick={() => setActiveTab("insignias")}
-          className={`px-3 py-1 text-sm font-medium whitespace-nowrap ${activeTab === "insignias" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-600 hover:text-blue-600"
-            }`}
+          className={`px-3 py-1 text-sm font-medium whitespace-nowrap ${
+            activeTab === "insignias" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-600 hover:text-blue-600"
+          }`}
         >
           Insignias
         </button>
@@ -274,6 +309,117 @@ function Dashboard() {
           </div>
         </div>
 
+        {/* Top Usuarios - Leaderboard */}
+        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl shadow-lg mb-6 overflow-hidden">
+          <div className="p-6">
+            <div className="flex items-center mb-6">
+              <div className="bg-white/20 p-3 rounded-full mr-4">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-8 w-8 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">🏆 Top Estudiantes</h2>
+                <p className="text-purple-100">Los usuarios con mayor puntaje</p>
+              </div>
+            </div>
+
+            {loadingLeaderboard ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-white ml-3">Cargando ranking...</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {topUsuarios.map((usuario, index) => {
+                  const maxPuntaje = topUsuarios[0]?.puntaje || 1
+                  const porcentaje = (usuario.puntaje / maxPuntaje) * 100
+                  const posicion = index + 1
+
+                  return (
+                    <div key={usuario.id} className="relative group">
+                      {/* Posición */}
+                      <div
+                        className={`absolute -top-2 left-1/2 transform -translate-x-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${
+                          posicion === 1 ? "bg-yellow-500" : posicion === 2 ? "bg-gray-400" : "bg-orange-600"
+                        }`}
+                      >
+                        {posicion}
+                      </div>
+
+                      {/* Barra animada */}
+                      <div className="bg-white/20 rounded-lg p-4 backdrop-blur-sm border border-white/30 hover:bg-white/30 transition-all duration-300 transform hover:scale-105">
+                        <div className="text-center mb-3">
+                          {/* Avatar con tooltip */}
+                          <div className="relative inline-block group">
+                            <img
+                              src={usuario.avatar || `https://api.dicebear.com/6.x/initials/svg?seed=${usuario.correo}`}
+                              alt={`Avatar de ${usuario.correo}`}
+                              className="w-16 h-16 rounded-full border-4 border-white shadow-lg mx-auto mb-2 transition-transform duration-300 group-hover:scale-110"
+                            />
+                            {/* Tooltip con nombre */}
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap z-20">
+                              {usuario.nombre || usuario.correo}
+                              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black"></div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Información del usuario */}
+                        <div className="text-center text-white">
+                          <p className="font-bold text-lg">{usuario.puntaje || 0}</p>
+                          <p className="text-sm text-purple-100">puntos</p>
+                          <p className="text-xs text-purple-200 mt-1">Nivel {calcularNivel(usuario.puntaje || 0)}</p>
+                        </div>
+
+                        {/* Barra de progreso animada */}
+                        <div className="mt-4 bg-white/20 rounded-full h-3 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-1000 ease-out ${
+                              posicion === 1
+                                ? "bg-gradient-to-r from-yellow-400 to-yellow-600"
+                                : posicion === 2
+                                  ? "bg-gradient-to-r from-gray-300 to-gray-500"
+                                  : "bg-gradient-to-r from-orange-400 to-orange-600"
+                            }`}
+                            style={{
+                              width: `${porcentaje}%`,
+                              animationDelay: `${index * 200}ms`,
+                            }}
+                          ></div>
+                        </div>
+
+                        {/* Medalla para el primer lugar */}
+                        {posicion === 1 && <div className="absolute -top-1 -right-1 text-2xl animate-bounce">👑</div>}
+                      </div>
+                    </div>
+                  )
+                })}
+
+                {/* Mensaje si no hay suficientes usuarios */}
+                {topUsuarios.length === 0 && (
+                  <div className="col-span-full text-center text-white py-8">
+                    <div className="text-4xl mb-2">🏆</div>
+                    <p className="text-lg font-medium">¡Sé el primero en el ranking!</p>
+                    <p className="text-purple-100">Completa módulos para aparecer aquí</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Contenido basado en la pestaña activa */}
         {activeTab === "modulos" && (
           <div>
@@ -291,9 +437,10 @@ function Dashboard() {
                   <div
                     className="h-32 bg-cover bg-center"
                     style={{
-                      backgroundImage: `url(${modulos.imagenUrl ||
+                      backgroundImage: `url(${
+                        modulos.imagenUrl ||
                         `https://api.dicebear.com/6.x/shapes/svg?seed=${modulos.titulo}&backgroundColor=4f46e5`
-                        })`,
+                      })`,
                     }}
                   ></div>
                   <div className="p-5">
@@ -301,12 +448,13 @@ function Dashboard() {
                       <h3 className="font-bold text-lg text-gray-800">{modulos.titulo}</h3>
                       {modulos.dificultad && (
                         <span
-                          className={`text-xs font-medium px-2 py-1 rounded ${modulos.dificultad === "Fácil"
-                            ? "bg-green-100 text-green-800"
-                            : modulos.dificultad === "Medio"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
-                            }`}
+                          className={`text-xs font-medium px-2 py-1 rounded ${
+                            modulos.dificultad === "Fácil"
+                              ? "bg-green-100 text-green-800"
+                              : modulos.dificultad === "Medio"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-red-100 text-red-800"
+                          }`}
                         >
                           {modulos.dificultad}
                         </span>
@@ -385,10 +533,15 @@ function Dashboard() {
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium text-gray-700">Ejercicios completados</span>
-                    <span className="text-sm font-medium text-gray-700">{ejerciciosCompletados}/{totalEjercicios}</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      {ejerciciosCompletados}/{totalEjercicios}
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${(ejerciciosCompletados / totalEjercicios) * 100}%` }}></div>
+                    <div
+                      className="bg-green-500 h-2.5 rounded-full"
+                      style={{ width: `${totalEjercicios > 0 ? (ejerciciosCompletados / totalEjercicios) * 100 : 0}%` }}
+                    ></div>
                   </div>
                 </div>
 
@@ -398,7 +551,10 @@ function Dashboard() {
                     <span className="text-sm font-medium text-gray-700">{evaluacionesHechas}/5</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div className="bg-purple-500 h-2.5 rounded-full" style={{ width: `${(evaluacionesHechas / 5) * 100}%` }}></div>
+                    <div
+                      className="bg-purple-500 h-2.5 rounded-full"
+                      style={{ width: `${(evaluacionesHechas / 5) * 100}%` }}
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -448,7 +604,7 @@ function Dashboard() {
       {/* Pie de página */}
       <footer className="bg-gray-800 text-gray-300 py-4">
         <div className="container mx-auto px-4 text-center text-sm">
-          <p>© 2025  Plataforma de Física Gamificada. Todos los derechos reservados.</p>
+          <p>© 2025 Plataforma de Física Gamificada. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>
