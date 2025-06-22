@@ -1,0 +1,113 @@
+# 📚 Plataforma Web Gamificada – Física I
+
+Este proyecto es una plataforma interactiva desarrollada con **React + Vite**, orientada al aprendizaje gamificado de conceptos clave del curso **Física I**. Está dirigida a estudiantes de nivel universitario, combinando contenido visual, quizzes, recursos multimedia y seguimiento personalizado.
+
+---
+
+## Vista previa
+
+![Vista del sistema](https://i.postimg.cc/qBKg5q5V/Imagen1.png)
+
+## ⚙️ Tecnologías utilizadas
+
+- ⚛️ **React** – Librería para interfaces interactivas.
+- ⚡ **Vite.js** – Empaquetador rápido y moderno.
+- 🎨 **TailwindCSS** – Framework de estilos para diseño responsivo.
+- 🔐 **Firebase Auth** – Autenticación con correo/contraseña.
+- 🔥 **Cloud Firestore** – Base de datos en tiempo real.
+- ☁️ **Firebase Storage** – Gestión de archivos adjuntos (PDFs, imágenes).
+- 🧭 **React Router DOM** – Navegación entre módulos y vistas protegidas.
+
+---
+
+## 🧠 Funcionalidades principales
+
+### 👨‍🏫 Administrador
+- Crear y editar módulos de aprendizaje.
+- Subir recursos como simulaciones (iFrame) y documentos (PDF).
+- Activar/desactivar la visibilidad de los módulos.
+- Ver historial de acceso de estudiantes.
+
+### 👨‍🎓 Estudiante
+- Ingresar a módulos activos.
+- Ver recursos de aprendizaje embebidos y descargables.
+- Realizar quizzes y visualizar su progreso.
+- Desbloquear insignias y puntos por participación.
+
+---
+
+## 🔐 Roles
+
+- `admin`: Accede al panel de gestión y configuración.
+- `usuario`: Vista educativa interactiva con seguimiento de avance.
+
+---
+
+## 🔥 Base de datos (Firestore)
+
+```plaintext
+modulos (collection)
+ └── {moduloId}
+      ├── titulo, descripcion, dificultad
+      ├── imagenUrl, iframeURL, archivoAdjuntoUrl
+      └── activo: true
+
+usuarios (collection)
+ └── {uid}
+      ├── nombre, correo, rol, puntaje
+      ├── insignias: []
+      └── avances: módulos completados, quizzes resueltos
+```
+
+---
+
+## 🛠️ Instalación local
+
+```bash
+git clone https://github.com/tuusuario/nombre-del-repo.git
+cd nombre-del-repo
+npm install
+npm run dev
+```
+
+⚠️ Recuerda configurar tu archivo `.env` con los valores de Firebase:
+
+```env
+VITE_API_KEY=...
+VITE_AUTH_DOMAIN=...
+VITE_PROJECT_ID=...
+VITE_STORAGE_BUCKET=...
+VITE_MESSAGING_SENDER_ID=...
+VITE_APP_ID=...
+```
+
+---
+
+## 📁 Estructura del proyecto
+
+```
+/src
+ ├── /components
+ ├── /pages
+      ├── /admin
+      ├── /auth
+      ├── /gamiificacion
+      ├── /perfil
+      ├── /test
+ ├── /scripts
+ ├── /utils
+ ├── /firebase
+ ├── App.jsx
+ └── main.jsx
+
+firebase.js      → Configuración de Firebase
+vite.config.js   → Configuración del entorno Vite
+```
+
+---
+
+## 📝 Licencia
+
+Este proyecto es de código abierto bajo la licencia MIT.
+
+Desarrollado con 💻 por **Gerardo Fabian Gonzalez Moreno **
