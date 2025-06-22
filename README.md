@@ -5,8 +5,19 @@ Este proyecto es una plataforma interactiva desarrollada con **React + Vite**, o
 ---
 
 ## Vista previa
+## Dashboard
+![Vista del sistema](https://i.postimg.cc/N0yqJ5yz/imagen-2025-06-22-102222935.png)
 
+## Usuario (Logros)
 ![Vista del sistema](https://i.postimg.cc/qBKg5q5V/Imagen1.png)
+
+## Admin (Modulos)
+![Gestión de Modulos](https://i.postimg.cc/RhkvdvFt/imagen-2025-06-22-101911943.png)
+
+## Admin (Usuarios)
+![Gestión de Usuarios](https://i.postimg.cc/rFGHQ5fm/imagen-2025-06-22-102116857.png)
+
+
 
 ## ⚙️ Tecnologías utilizadas
 
